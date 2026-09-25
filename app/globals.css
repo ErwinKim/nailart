@@ -1016,6 +1016,71 @@ body {
   background: #f8f7f2;
   box-shadow: 0 28px 80px rgba(0, 0, 0, 0.3);
   color: #171812;
+  isolation: isolate;
+}
+
+@property --prompt-beam-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
+@property --prompt-beam-angle-alt {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 180deg;
+}
+
+.prompt-box::before {
+  position: absolute;
+  inset: -3px;
+  z-index: 2;
+  padding: 4px;
+  border-radius: inherit;
+  background: conic-gradient(from var(--prompt-beam-angle), transparent 0deg 278deg, rgba(216, 255, 98, 0.7) 294deg, #d8ff62 310deg, #ffffff 320deg, #d8ff62 330deg, rgba(216, 255, 98, 0.7) 346deg, transparent 354deg 360deg);
+  content: "";
+  animation: prompt-border-beam 4.8s linear infinite;
+  filter: drop-shadow(0 0 4px rgba(216, 255, 98, 1)) drop-shadow(0 0 12px rgba(216, 255, 98, 0.75));
+  pointer-events: none;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+
+.prompt-box::after {
+  position: absolute;
+  inset: -3px;
+  z-index: 2;
+  padding: 4px;
+  border-radius: inherit;
+  background: conic-gradient(from var(--prompt-beam-angle-alt), transparent 0deg 278deg, rgba(216, 255, 98, 0.7) 294deg, #d8ff62 310deg, #ffffff 320deg, #d8ff62 330deg, rgba(216, 255, 98, 0.7) 346deg, transparent 354deg 360deg);
+  content: "";
+  animation: prompt-border-beam-alt 4.8s linear infinite;
+  filter: drop-shadow(0 0 4px rgba(216, 255, 98, 1)) drop-shadow(0 0 12px rgba(216, 255, 98, 0.75));
+  pointer-events: none;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+
+.prompt-box > * {
+  position: relative;
+  z-index: 3;
+}
+
+@keyframes prompt-border-beam {
+  to { --prompt-beam-angle: 360deg; }
+}
+
+@keyframes prompt-border-beam-alt {
+  to { --prompt-beam-angle-alt: 540deg; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .prompt-box::before,
+  .prompt-box::after {
+    animation: none;
+  }
 }
 
 .prompt-file-input {

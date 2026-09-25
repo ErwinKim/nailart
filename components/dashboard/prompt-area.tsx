@@ -70,12 +70,12 @@ export default function PromptArea() {
 
 	return (
 		<section className="prompt-area" aria-label="Thumbnail prompt">
-			<h1 className="prompt-greeting">How can I help you?</h1>
+			<h1 className="prompt-greeting">Describe your Thumbnail</h1>
 			<form className="prompt-box" onSubmit={handleSubmit}>
 				<input ref={fileInputRef} className="prompt-file-input" type="file" accept="image/*" onChange={handleFileChange} />
 				{imagePreview ? (
 					<div className="prompt-image-preview">
-						<Image src={imagePreview} alt="Selected reference" width={58} height={58} unoptimized />
+						<Image src={imagePreview} alt="Selected reference" width={35} height={35} unoptimized />
 						<button type="button" onClick={() => setImagePreview(null)} aria-label="Remove image"><CloseIcon /></button>
 					</div>
 				) : null}
