@@ -104,7 +104,7 @@ export default function AetherHero({
   title = 'Make thumbnails people cannot scroll past.',
   subtitle = 'NailArt AI turns a video idea into a bold, click-worthy YouTube thumbnail in seconds.',
   ctaLabel = 'Create a thumbnail',
-  ctaHref = '#workspace',
+  ctaHref = '/auth',
   secondaryCtaLabel = 'Explore the studio',
   secondaryCtaHref = '#about',
   align = 'left',
@@ -213,7 +213,6 @@ export default function AetherHero({
         </div>
         <div className="site-nav-actions">
           <a className="site-sign-in" href="/auth">Sign in</a>
-          <a className="site-nav-cta" href="#workspace">Create thumbnail <span aria-hidden="true">↗</span></a>
         </div>
       </nav>
       <div

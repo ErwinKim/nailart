@@ -8,7 +8,6 @@ export default function Home() {
         <p className="aurora-kicker">Built for the next upload</p>
         <h2>From rough idea to scroll-stopping thumbnail, without the blank canvas.</h2>
       </section>
-      <div id="workspace" aria-hidden="true" />
     </main>
   );
 }
