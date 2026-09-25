@@ -3,8 +3,8 @@
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { useAuth } from '@/components/providers/auth-provider';
-import DashboardNav from '@/components/dashboard/dashboard-nav';
-import PromptArea from '@/components/dashboard/prompt-area';
+import DashboardNav from './dashboard-nav';
+import PromptArea from './prompt-area';
 
 export default function DashboardPage() {
 	const router = useRouter();

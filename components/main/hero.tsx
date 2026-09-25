@@ -212,7 +212,7 @@ export default function AetherHero({
           <a href="#pricing">Pricing</a>
         </div>
         <div className="site-nav-actions">
-          <a className="site-sign-in" href="/auth">Sign in</a>
+          <Link className="site-sign-in" href="/auth">Sign in</Link>
         </div>
       </nav>
       <div
