@@ -467,6 +467,12 @@ body {
   transform: translateY(-2px);
 }
 
+.google-button:disabled {
+  cursor: wait;
+  opacity: 0.7;
+  transform: none;
+}
+
 .google-icon {
   display: grid;
   width: 30px;
@@ -491,6 +497,14 @@ body {
   color: rgba(248, 247, 242, 0.4);
   font-size: 0.74rem;
   line-height: 1.5;
+  text-align: center;
+}
+
+.auth-error {
+  margin: 14px 12px 0;
+  color: #ffb4a7;
+  font-size: 0.76rem;
+  line-height: 1.45;
   text-align: center;
 }
 
