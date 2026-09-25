@@ -1,11 +1,18 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 import AetherHero from '@/components/main/hero';
 import { useAuth } from '@/components/providers/auth-provider';
 
 export default function AuthPage() {
-	const { error, loading, signInWithGoogle } = useAuth();
+	const router = useRouter();
+	const { error, loading, signInWithGoogle, user } = useAuth();
+
+	useEffect(() => {
+		if (!loading && user) router.replace('/dashboard');
+	}, [loading, router, user]);
 
 	return (
 		<main className="auth-page">
