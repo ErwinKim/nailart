@@ -1,7 +1,7 @@
 'use client';
 
 import type { ChangeEvent, FormEvent } from 'react';
-import { useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 
 type Tool = {
@@ -9,6 +9,14 @@ type Tool = {
 	name: string;
 	shortName: string;
 	icon: string;
+};
+
+type GeneratedThumbnail = {
+	id: string;
+	prompt: string;
+	imagePath: string;
+	imageUrl: string;
+	mimeType: string;
 };
 
 const tools: Tool[] = [
@@ -42,10 +50,20 @@ function CloseIcon() {
 export default function PromptArea() {
 	const [prompt, setPrompt] = useState('');
 	const [imagePreview, setImagePreview] = useState<string | null>(null);
+	const [referenceImage, setReferenceImage] = useState<File | null>(null);
+	const [generatedThumbnail, setGeneratedThumbnail] = useState<GeneratedThumbnail | null>(null);
+	const [isGenerating, setIsGenerating] = useState(false);
+	const [generationError, setGenerationError] = useState<string | null>(null);
 	const [selectedTool, setSelectedTool] = useState<Tool | null>(null);
 	const [toolsOpen, setToolsOpen] = useState(false);
 	const textareaRef = useRef<HTMLTextAreaElement>(null);
 	const fileInputRef = useRef<HTMLInputElement>(null);
+
+	useEffect(() => {
+		return () => {
+			if (imagePreview?.startsWith('blob:')) URL.revokeObjectURL(imagePreview);
+		};
+	}, [imagePreview]);
 
 	useLayoutEffect(() => {
 		const textarea = textareaRef.current;
@@ -56,27 +74,67 @@ export default function PromptArea() {
 
 	const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
 		const file = event.target.files?.[0];
-		if (file?.type.startsWith('image/')) {
-			const reader = new FileReader();
-			reader.onloadend = () => setImagePreview(reader.result as string);
-			reader.readAsDataURL(file);
+		if (file) {
+			if (!['image/png', 'image/jpeg', 'image/webp', 'image/gif'].includes(file.type)) {
+				setGenerationError('Use a PNG, JPEG, WebP, or GIF reference image.');
+			} else if (file.size > 10 * 1024 * 1024) {
+				setGenerationError('Reference images must be 10 MB or smaller.');
+			} else {
+				setGenerationError(null);
+				setReferenceImage(file);
+				setImagePreview(URL.createObjectURL(file));
+			}
 		}
 		event.target.value = '';
 	};
 
-	const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+	const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
+		if (!prompt.trim() || isGenerating) return;
+
+		setIsGenerating(true);
+		setGenerationError(null);
+		setGeneratedThumbnail(null);
+
+		try {
+			const formData = new FormData();
+			formData.set('prompt', prompt.trim());
+			if (referenceImage) formData.set('reference', referenceImage);
+
+			const response = await fetch('/api/thumbnails', { method: 'POST', body: formData });
+			const result = await response.json() as { error?: string; thumbnail?: GeneratedThumbnail };
+			if (!response.ok || !result.thumbnail) {
+				throw new Error(result.error || 'Thumbnail generation failed. Please try again.');
+			}
+
+			setGeneratedThumbnail(result.thumbnail);
+		} catch (error) {
+			setGenerationError(error instanceof Error ? error.message : 'Thumbnail generation failed. Please try again.');
+		} finally {
+			setIsGenerating(false);
+		}
 	};
 
 	return (
 		<section className="prompt-area" aria-label="Thumbnail prompt">
 			<h1 className="prompt-greeting">Describe your Thumbnail</h1>
+			{generatedThumbnail ? (
+				<figure className="generated-thumbnail">
+					<Image src={generatedThumbnail.imageUrl} alt="AI-generated YouTube thumbnail" width={1376} height={774} unoptimized />
+					<figcaption>
+						<span>Nano Banana Pro <i aria-hidden="true" /> Saved to your studio</span>
+						<a href={generatedThumbnail.imageUrl} target="_blank" rel="noreferrer">Open image <span aria-hidden="true">↗</span></a>
+					</figcaption>
+				</figure>
+			) : null}
+			{isGenerating ? <p className="prompt-generation-status" role="status">Creating your thumbnail with Nano Banana Pro...</p> : null}
+			{generationError ? <p className="prompt-generation-error" role="alert">{generationError}</p> : null}
 			<form className="prompt-box" onSubmit={handleSubmit}>
 				<input ref={fileInputRef} className="prompt-file-input" type="file" accept="image/*" onChange={handleFileChange} />
 				{imagePreview ? (
 					<div className="prompt-image-preview">
-						<Image src={imagePreview} alt="Selected reference" width={35} height={35} unoptimized />
-						<button type="button" onClick={() => setImagePreview(null)} aria-label="Remove image"><CloseIcon /></button>
+						<Image src={imagePreview} alt="Selected reference" width={58} height={58} unoptimized />
+						<button type="button" onClick={() => { setImagePreview(null); setReferenceImage(null); }} aria-label="Remove image"><CloseIcon /></button>
 					</div>
 				) : null}
 				<textarea
@@ -109,7 +167,9 @@ export default function PromptArea() {
 					</div>
 					<div className="prompt-toolbar-right">
 						<button className="prompt-icon-button" type="button" title="Record voice" aria-label="Record voice"><MicIcon /></button>
-						<button className="prompt-send-button" type="submit" disabled={!prompt.trim() && !imagePreview} title="Send" aria-label="Send"><SendIcon /></button>
+						<button className="prompt-send-button" type="submit" disabled={!prompt.trim() || isGenerating} title="Generate thumbnail" aria-label="Generate thumbnail" aria-busy={isGenerating}>
+							{isGenerating ? <span className="prompt-send-spinner" aria-hidden="true" /> : <SendIcon />}
+						</button>
 					</div>
 				</div>
 			</form>
